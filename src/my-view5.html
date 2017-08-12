@@ -1,0 +1,162 @@
+<!doctype html>
+<!-- Copyright (c) 2015 Google Inc. All rights reserved. -->
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <title>ODIX google-apis Demo</title>
+  <script src="../bower_components/webcomponentsjs/webcomponents.js"></script>
+  <link rel="import" href="../bower_components/google-apis/google-apis.html">
+  <link rel="import" href="../bower_components/polymer/polymer.html">
+  <link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
+  <link rel="import" href="../bower_components/google-signin/google-signin.html">
+  <link rel="import" href="../bower_components/google-signin/google-signin-aware.html">
+  <link rel="import" href="shared-styles.html">
+  <dom-module id="my-view5">
+<template id="awareness" is="dom-bind">
+  <!-- Demo only styles -->
+  <style>
+    body {
+      font-family: 'RobotoDraft', 'Roboto', sans-serif;
+      line-height:1.2;
+      vertical-align:middle;
+      background: rgba(204, 204, 204, 0.31);
+    }
+
+
+    .map {
+      background: whitesmoke;
+      margin: .5rem -1.5rem 0 -1.5rem;
+      padding: 0.5rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight:200;
+      clear: both;
+    }
+
+    h1 strong {
+      font-weight:300;
+      color:#539D00;
+    }
+
+    h2 {
+      font-size:.9rem;
+      line-height:2.5;
+      color:gray;
+      font-weight:400;
+      clear: both;
+    }
+
+    .showcase {
+      display: inline-block;
+      margin-right: 2rem;
+      float: left;
+    }
+  </style>
+  
+</head>
+<body>
+	<p>A <code>&lt;google-signin&gt;</code> Sample google and google Plus login for ODIX:</p>
+	<p>ODIX Google :: <google-signin brand="google" client-id="588627757546-g157nr15itj2ol5pmn1qb3a0qrqdeaan.apps.googleusercontent.com"></google-signin>
+	ODIX Google Plus ::
+  <google-signin brand="google-plus" client-id="588627757546-g157nr15itj2ol5pmn1qb3a0qrqdeaan.apps.googleusercontent.com"></google-signin>
+  </p>
+    <div id="messages"></div>
+
+
+<google-signin-aware
+        scopes="{{scope}}"
+        openid-prompt="{{openidPromptValue}}"
+        signed-in="{{signedIn}}"
+        offline="{{offline}}"
+        is-authorized="{{isAuthorized}}"
+        need-additional-auth="{{needAdditionalAuth}}"
+        on-google-signin-aware-error="handleSignInError"
+        on-google-signin-aware-success="handleSignIn"
+        on-google-signin-offline-success="handleOffline"
+        on-google-signin-aware-signed-out="handleSignOut"></google-signin-aware>
+		
+		<p>User name:<span>{{userName}}</span></p>
+    <p>Testing <code>google-signin-aware</code> events: <span>{{status}}</span></p>
+    <p>Testing <code>google-signin-offline</code> events: <span>{{offlineCode}}</span></p>
+    <p><button on-click="disconnect">Disconnect to start over</button></p>
+  </template>
+</dom-module>
+    
+<script>
+
+Polymer({
+is: 'my-view5',
+properties: {
+         // clientId: String,
+          status: String,
+          offlineCode: String,
+          userName: String,
+          openidPrompt: {},
+          profileImgSrc: {
+            type: String,
+            value: ''
+          }
+        },
+	ready: function() {
+	status = 'Not granted';
+    offlineCode = 'No offline login.';
+    userName = 'N/A';
+    openidPrompt = {};
+	},
+    handleSignInError : function(event) {
+      this.status = JSON.stringify(event.detail);
+    },
+    handleSignIn : function(response) {
+      this.status = 'Signin granted';
+      // console.log('[Aware] Signin Response', response);
+      this.userName = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile().getName();
+    },
+    handleOffline : function(response) {
+      this.offlineCode = response.detail.code;
+    },
+    handleSignOut: function(response) {
+      this.status = 'Signed out';
+      // console.log('[Aware] Signout Response', response);
+      this.userName = 'N/A';
+    },
+    disconnect : function() {
+      var b = document.querySelector('google-signin');
+      var currentUser = gapi.auth2.getAuthInstance().currentUser.get();
+      if (currentUser) {
+        currentUser.disconnect();
+      }
+      gapi.auth2.getAuthInstance().signOut();
+    },
+	listeners: {
+          'openid-prompt-changed': 'handleClick',
+        },
+	handleClick : function(e) {
+      if (e.detail.value) {
+        if (e.detail.path === 'openidPrompt.none') {
+          aware.set('openidPrompt', {
+            none: true,
+            login: false,
+            consent: false,
+            select_account: false
+          });
+        } else {
+          aware.set('openidPrompt.none', false);
+        }
+      }
+
+      var values = [];
+      Object.keys(aware.openidPrompt).forEach(function(k) {
+        if (aware.openidPrompt[k]) {
+          values.push(k);
+        }
+      });
+      this.set('openidPromptValue', values.join(' '));
+    }   
+	});
+
+  </script>
+</body>
+</html>
+

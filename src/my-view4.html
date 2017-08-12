@@ -1,0 +1,124 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/iron-localstorage/iron-localstorage.html">
+<link rel="import" href="../bower_components/google-signin/google-signin.html">
+<link rel="import" href="shared-styles.html">
+
+<dom-module id="my-view4">
+  <template>
+    <style include="shared-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+    </style>
+	<iron-localstorage 
+      name="userData" 
+      value="{{storedUser}}" 
+      on-iron-localstorage-load="_setProfileImg"></iron-localstorage>
+	  
+	  <google-signin
+      id="signinElement"
+      clientId="588627757546-g157nr15itj2ol5pmn1qb3a0qrqdeaan.apps.googleusercontent.com"
+      scopes="email profile"
+	  signed-in="{{signedIn}}"
+      on-google-signin-success="{{signInSuccess}}"
+      on-google-signin-failure="signedOut"
+      on-google-signed-out="signedOut"></google-signin>
+	  <div class="customBtn signIn" on-click="signIn">
+      <span class="icon"></span>
+      <span class="buttonText">Sign in with Google</span>
+    </div>
+ <!--   </template>-->
+  <!--  <template if="{{ signedIn }}">-->
+    <div class="customBtn signOut" on-click="signOut">
+      <span class="icon"></span>
+      <span class="buttonText">Sign out</span>
+    </div>
+	  
+    <div class="card">
+      <div class="circle">4</div>
+      <h1>View Four</h1>
+      <p>Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found.</p>
+      <p>Ea duis bonorum nec, falli paulo aliquid ei eum.Has at minim mucius aliquam, est id tempor laoreet.Pro saepe pertinax ei, ad pri animal labores suscipiantur.</p>
+    </div>
+  </template>
+<script src="https://apis.google.com/js/api.js"></script>
+  <script>
+    Polymer({
+      is: 'my-view4',
+	  clientId: '588627757546-g157nr15itj2ol5pmn1qb3a0qrqdeaan.apps.googleusercontent.com',
+	  scopes: 'https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/plus.login',
+	  cookiePolicy: 'single_host_origin',
+	  requestVisibleActions: '',
+      signedIn: false,
+
+        properties: {
+         // clientId: String,
+          domain: String,
+          redirectUrl: String,
+          storedUser: Object,
+          auth0Lock: Object,
+          profileImgSrc: {
+            type: String,
+            value: ''
+          }
+        },
+		 attached: function () {
+        if (this.clientId === '') {
+          throw 'A valid clientId is required to use this element';
+        }
+      },
+	  signedIn: function() {
+	  var profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+       console.log('Name: ' + profile.getName());
+       console.log('Image: ' + profile.getImageUrl());
+	  },
+      signInSuccess: function () {
+        this.signedIn = true;
+      },
+      signedOut: function () {
+	  
+	  
+        this.signedIn = false;
+      },
+      signIn: function () {
+	  alert(this.clientId);
+        this.$.signinElement.signIn();
+      },
+      signOut: function () {
+        this.$.signinElement.signOut();
+      },
+
+        ready: function() {
+          var _self = this;
+
+        },
+
+        _setProfileImg: function() {
+          //this.set('profileImgSrc', this.storedUser.profile.picture);
+        },
+
+        showLock: function() {
+          //this.auth0Lock.show();
+        },
+
+        logOut: function() {
+          this.set('storedUser', null);
+          this.set('profileImgSrc', '');
+        }
+    });
+  </script>
+</dom-module>
